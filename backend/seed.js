@@ -2,7 +2,7 @@
    SEED SCRIPT  (optional, demo/initial data)
    Run:  npm run seed  (from the project root)
    Creates:
-     - Admin (BALA SUBRAMANI / bala / Bala@1234)
+     - Admin (configured through ADMIN_USERNAME / ADMIN_PASSWORD)
      - Poultry Set 1 and Set 2 + starting bird records
      - Demo egg production for the last 3 days
      - Demo egg prices (marked as MANUAL demo data)
@@ -243,7 +243,7 @@ async function seed() {
   console.log('---------------------------------------------');
   console.log('Admin login:');
   console.log(`  Username: ${admin.username}`);
-  console.log(`  Password: ${process.env.ADMIN_PASSWORD || 'Bala@1234'}`);
+  console.log('  Password: configured via ADMIN_PASSWORD (not shown).');
   console.log('All records above are labeled DEMO DATA.');
   await mongoose.disconnect();
 }

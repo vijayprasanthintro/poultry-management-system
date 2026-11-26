@@ -8,10 +8,10 @@ function getConnectionCache() {
 }
 
 const connectDB = async () => {
-  const uri = process.env.MONGODB_URI;
+  const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
   if (!uri) {
     const message =
-      'MONGODB_URI is not set. Set the MongoDB connection string in the Vercel dashboard (or in .env for local development).';
+      'MONGODB_URI (or legacy alias MONGO_URI) is not set. Set the MongoDB connection string in the Vercel dashboard (or in backend/.env for local development).';
     console.error(message);
     throw new Error(message);
   }

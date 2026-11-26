@@ -1,13 +1,21 @@
 const fs = require('fs');
 const path = require('path');
-// Root .env is convenient for local development. On Vercel, values come from
-// the dashboard and dotenv does not overwrite variables already in process.env.
-require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-const express = require('express');
-const cors = require('cors');
-const rateLimit = require('express-rate-limit');
+// Some packages expose an ESM-facing default export that CommonJS resolves as
+// an object with `default` (and sometimes a named export). Normalize before use.
+const dotenvModule = require('dotenv');
+const dotenv = dotenvModule.default || dotenvModule;
+// Load local .env files by absolute path so this works from any folder.
+// override:false keeps values already provided by Vercel authoritative.
+dotenv.config({ path: path.join(__dirname, '..', '.env'), override: false });
+dotenv.config({ path: path.join(__dirname, '.env'), override: false });
+
+const expressModule = require('express');
+const express = expressModule.default || expressModule;
+const corsModule = require('cors');
+const cors = corsModule.default || corsModule;
+const mod = require('express-rate-limit');
+const rateLimit = mod.rateLimit || mod.default || mod;
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
