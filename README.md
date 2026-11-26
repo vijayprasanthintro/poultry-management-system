@@ -52,7 +52,7 @@ From the project root:
 ```bash
 npm install
 cp .env.example .env
-# Edit .env: set MONGO_URI and a long random JWT_SECRET
+# Edit .env: set MONGODB_URI and a long random JWT_SECRET
 npm run dev
 ```
 
@@ -76,10 +76,10 @@ The backend reads the root `.env` first, then `backend/.env` if present. Values 
 | --- | --- | --- |
 | `PORT` | No | API port, default `5000` |
 | `NODE_ENV` | No | `development`, `test`, or `production` |
-| `MONGO_URI` | Yes | MongoDB connection string |
+| `MONGODB_URI` | Yes | MongoDB connection string; no localhost fallback |
 | `JWT_SECRET` | Yes | At least 16 characters |
 | `JWT_EXPIRES_IN` | No | Token lifetime, default `7d` |
-| `CLIENT_URL` | Production | Comma-separated allowed browser origins for CORS |
+| `CLIENT_URL`, `CORS_ORIGIN` | Recommended | Extra comma-separated CORS origins; defaults include the Vercel domain and localhost |
 | `VITE_API_URL` | No | Override the dev proxy; leave blank for `/api` |
 | `ADMIN_NAME`, `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_EMAIL` | Seed only | Initial admin account |
 | `EGG_PRICE_API_URL`, `EGG_PRICE_API_KEY`, `EGG_PRICE_API_KEY_HEADER`, `EGG_PRICE_API_PRICE_PATH` | No | Optional market-price lookup; manual entry always works |
@@ -102,13 +102,14 @@ The backend reads the root `.env` first, then `backend/.env` if present. Values 
 ```bash
 npm install
 npm run build
-NODE_ENV=production CLIENT_URL=https://your-domain.example npm start
+NODE_ENV=production MONGODB_URI=<your-atlas-uri> CLIENT_URL=https://your-domain.example npm start
 ```
 
 On Windows PowerShell:
 
 ```powershell
 $env:NODE_ENV='production'
+$env:MONGODB_URI='<your-atlas-uri>'
 $env:CLIENT_URL='https://your-domain.example'
 npm start
 ```
@@ -153,7 +154,7 @@ Covered workflows: health check, login success/failure, protected routes, egg pr
 
 - Passwords are hashed with bcrypt; protected endpoints verify JWTs.
 - Login and general API rate limits are enabled.
-- CORS accepts only `CLIENT_URL` origins (plus same-origin/no-origin requests).
+- CORS accepts the deployed Vercel domain and localhost by default, plus any comma-separated origins in `CLIENT_URL` / `CORS_ORIGIN` (and same-origin/no-origin requests). Credentials and preflight OPTIONS are supported.
 - Request validation and strict date/number parsing are centralised in `backend/utils/helpers.js`.
 - Audit logs record creates, updates, deletes, logins, and settings changes.
 - CSV exports escape quotes, commas, and newlines.

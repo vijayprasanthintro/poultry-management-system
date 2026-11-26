@@ -4,7 +4,7 @@ const logAudit = require('../utils/audit');
 
 const requireJwtSecret = () => {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 16) {
-    const err = new Error('JWT_SECRET is missing or too short. Set it in the backend .env file (at least 16 characters).');
+    const err = new Error('JWT_SECRET is missing or too short. Set it in the Vercel dashboard or backend .env (at least 16 characters).');
     err.status = 500;
     throw err;
   }
@@ -23,6 +23,7 @@ const login = async (req, res, next) => {
     if (!username || !password) {
       return res.status(400).json({ success: false, message: 'Please provide username and password.' });
     }
+    requireJwtSecret();
     const admin = await Admin.findOne({ username: String(username).toLowerCase() }).select('+password');
     if (!admin || !(await admin.matchPassword(password))) {
       await logAudit(req, {

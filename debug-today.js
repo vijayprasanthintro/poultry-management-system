@@ -7,7 +7,10 @@ const LocalSale = require('./backend/models/LocalSale');
 const EggStock = require('./backend/models/EggStock');
 
 (async () => {
-  await mongoose.connect('mongodb://127.0.0.1:27017/poultry');
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI is not set. Set it in .env before running this debug script.');
+  }
+  await mongoose.connect(process.env.MONGODB_URI);
   const s = startOfDay(new Date());
   const e = endOfDay(new Date());
   console.log('TZ offset (min):', new Date().getTimezoneOffset());

@@ -6,11 +6,11 @@ const mongoose = require('../backend/node_modules/mongoose');
 // Safety: force an isolated database before the app (and dotenv) is loaded.
 process.env.NODE_ENV = 'test';
 process.env.PORT = '0';
-process.env.MONGO_URI = 'mongodb://127.0.0.1:27017/poultry_test';
+process.env.MONGODB_URI = 'mongodb://127.0.0.1:27017/poultry_test';
 process.env.JWT_SECRET = 'test-only-secret-that-is-long-enough';
 process.env.JWT_EXPIRES_IN = '1h';
 
-const dbName = new URL(process.env.MONGO_URI).pathname.replace(/^\//, '');
+const dbName = new URL(process.env.MONGODB_URI).pathname.replace(/^\//, '');
 if (dbName !== 'poultry_test') {
   throw new Error(`Refusing to run tests against database "${dbName}". Only poultry_test is allowed.`);
 }

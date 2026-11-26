@@ -3,7 +3,10 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 const mongoose = require('mongoose');
 
 (async () => {
-  await mongoose.connect('mongodb://127.0.0.1:27017/poultry');
+  if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI is not set. Set it in .env before running this debug script.');
+  }
+  await mongoose.connect(process.env.MONGODB_URI);
   const { computeDashboard } = require('./controllers/dashboardController');
   const fakeReq = { query: { range: 'today' } };
   const data = await computeDashboard(fakeReq);

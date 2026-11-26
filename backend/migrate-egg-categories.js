@@ -19,7 +19,10 @@ const LocalSale = require('./models/LocalSale');
 const { refreshEggStockForDate } = require('./services/eggStockService');
 
 async function migrate() {
-  const uri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/poultry';
+  const uri = process.env.MONGODB_URI;
+  if (!uri) {
+    throw new Error('MONGODB_URI is not set. Set it in .env or the Vercel dashboard before running the migration.');
+  }
   await mongoose.connect(uri);
   console.log('Connected to MongoDB.');
 
