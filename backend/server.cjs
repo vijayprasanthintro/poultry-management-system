@@ -14,8 +14,31 @@ const expressModule = require('express');
 const express = expressModule.default || expressModule;
 const corsModule = require('cors');
 const cors = corsModule.default || corsModule;
-const mod = require('express-rate-limit');
-const rateLimit = mod.rateLimit || mod.default || mod;
+// express-rate-limit has shipped different CommonJS shapes: some builds export
+// the middleware directly, others export { rateLimit, default }. Normalize it
+// and fail fast with the installed version if neither shape is callable.
+const getRateLimitVersion = () => {
+  try {
+    return require('express-rate-limit/package.json').version;
+  } catch (_) {
+    try {
+      const entry = require.resolve('express-rate-limit');
+      const pkgPath = path.join(path.dirname(entry), '..', 'package.json');
+      return JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version;
+    } catch (_) {
+      return 'unknown';
+    }
+  }
+};
+
+const rlMod = require('express-rate-limit');
+const rateLimit = typeof rlMod === 'function' ? rlMod : (rlMod.rateLimit || rlMod.default);
+if (typeof rateLimit !== 'function') {
+  throw new Error(
+    `express-rate-limit did not export a callable middleware (installed version: ${getRateLimitVersion()}). ` +
+      'Pin express-rate-limit to 7.x in backend/package.json and reinstall dependencies.'
+  );
+}
 const connectDB = require('./config/db');
 const { notFound, errorHandler } = require('./middleware/errorHandler');
 
@@ -131,7 +154,8 @@ async function startServer() {
   return server;
 }
 
-if (require.main === module) {
+// Vercel imports this module as the serverless app; it must not bind a port.
+if (require.main === module && !process.env.VERCEL) {
   startServer().catch((err) => {
     console.error(`Failed to start server: ${err.message}`);
     process.exitCode = 1;
