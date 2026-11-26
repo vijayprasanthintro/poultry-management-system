@@ -77,10 +77,10 @@ const getSummary = async (req, res, next) => {
 const createFeedUsage = async (req, res, next) => {
   try {
     const {
-      date = new Date(), set, feed, feedName = '', startingWeight = 0, feedAdded = 0,
+      date = new Date(), set, feed, feedName: providedFeedName = '', startingWeight = 0, feedAdded = 0,
       feedUsed, endingWeight, unit = 'KG', isAdjustment = false, notes = '',
     } = req.body;
-
+    let feedName = providedFeedName;
     if (set == null) return res.status(400).json({ success: false, message: 'Poultry set is required.' });
     const usageDate = parseDate(date);
     const used = parseAmount(feedUsed, 'Feed used');
