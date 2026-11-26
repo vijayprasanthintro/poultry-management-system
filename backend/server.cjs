@@ -19,15 +19,25 @@ const cors = corsModule.default || corsModule;
 // and fail fast with the installed version if neither shape is callable.
 const getRateLimitVersion = () => {
   try {
-    return require('express-rate-limit/package.json').version;
-  } catch (_) {
-    try {
-      const entry = require.resolve('express-rate-limit');
-      const pkgPath = path.join(path.dirname(entry), '..', 'package.json');
-      return JSON.parse(fs.readFileSync(pkgPath, 'utf8')).version;
-    } catch (_) {
-      return 'unknown';
+    // Modern packages do not export ./package.json, so resolve the main entry
+    // and walk up to the package root instead of requiring the subpath.
+    const entry = require.resolve('express-rate-limit');
+    let dir = path.dirname(entry);
+    while (dir && dir !== path.parse(dir).root) {
+      const pkgPath = path.join(dir, 'package.json');
+      if (fs.existsSync(pkgPath)) {
+        const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+        if (pkg.name === 'express-rate-limit') return pkg.version;
+      }
+      dir = path.dirname(dir);
     }
+  } catch (_) {
+    // Fall through to the version pinned in this package's manifest.
+  }
+  try {
+    return require('./package.json').dependencies['express-rate-limit'] || 'unknown';
+  } catch (_) {
+    return 'unknown';
   }
 };
 
