@@ -93,16 +93,33 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT !== undefined ? Number(process.env.PORT) : 5000;
 
-async function startServer() {
+function assertJwtSecret() {
   if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 16) {
     throw new Error('JWT_SECRET is missing or too short. Set it in .env (at least 16 characters).');
   }
-  await connectDB();
+}
+
+let dbReady;
+function ensureDb() {
+  if (!dbReady) dbReady = connectDB();
+  return dbReady;
+}
+
+async function startServer() {
+  assertJwtSecret();
+  await ensureDb();
   const server = app.listen(PORT, () => {
     const actualPort = server.address().port;
     console.log(`BALASUBRAMANI POULTRY API running on http://localhost:${actualPort}`);
   });
   return server;
+}
+
+// Vercel can load this file as the Express app's default export instead of
+// running it as the main module. Initialize the database in that case too.
+if (process.env.VERCEL === '1') {
+  assertJwtSecret();
+  ensureDb();
 }
 
 if (require.main === module) {
@@ -112,4 +129,6 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, startServer };
+module.exports = app;
+module.exports.app = app;
+module.exports.startServer = startServer;
